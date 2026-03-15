@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GitHub Dev Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f6f8fa;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:2rem;gap:1.5rem}
+#ui{display:flex;gap:.5rem;max-width:400px;width:100%}
+#u{flex:1;padding:.55rem 1rem;border:1px solid #d0d7de;border-radius:6px;
+  font:inherit;font-size:.95rem;outline:none;background:#fff}
+#u:focus{border-color:#2da44e;box-shadow:0 0 0 3px rgba(45,164,78,.2)}
+.btn{padding:.55rem 1.2rem;background:#2da44e;color:#fff;border:none;
+  border-radius:6px;font:600 .95rem 'Inter',sans-serif;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#2c974b}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+#out{display:none;flex-direction:column;align-items:center;gap:1.2rem}
+/* ── Card shell ── */
+.card{width:3.5in;height:2in;border-radius:10px;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.14)}
+/* ── Front ── */
+.front{background:#fff;border:1px solid #e6e8eb;display:flex;
+  align-items:center;padding:.2in .22in;gap:.18in}
+.front img{width:.74in;height:.74in;border-radius:50%;
+  border:2.5px solid #2da44e;flex-shrink:0;object-fit:cover}
+.info{flex:1;min-width:0}
+.info .name{font-size:14px;font-weight:700;color:#24292f;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info .handle{font-size:10.5px;color:#2da44e;font-weight:600;margin:2px 0 5px}
+.info .bio{font-size:9px;color:#57606a;line-height:1.4;margin-bottom:5px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.info .meta{display:flex;flex-direction:column;gap:2px}
+.info .meta span{font-size:8.5px;color:#57606a;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.info .meta .dot{color:#2da44e;font-size:9px;margin-right:4px}
+/* ── Back ── */
+.back{background:#0d1117;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.13in;padding:.16in .2in}
+.bh{color:#58a6ff;font-size:11px;font-weight:600;letter-spacing:.5px}
+/* ── Print ── */
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff;padding:0;margin:0;display:block}
+  #ui,#pBtn{display:none!important}
+  #out{display:block!important}
+  .card{width:3.5in;height:2in;border-radius:0;box-shadow:none}
+  .front{page-break-after:always;break-after:page}
+  .back{page-break-before:always;break-before:page}
+  @page{size:3.5in 2in;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+  <input id="u" placeholder="GitHub username" onkeydown="if(event.key==='Enter')go()">
+  <button class="btn" onclick="go()">Generate</button>
+</div>
+
+<div id="out">
+  <div class="card front">
+    <img id="av" src="" alt="">
+    <div class="info">
+      <div class="name"  id="nm"></div>
+      <div class="handle" id="hd"></div>
+      <div id="biWrap"><div class="bio" id="bi"></div></div>
+      <div class="meta">
+        <span id="lc"><span class="dot">&#x25cf;</span><span id="lct"></span></span>
+        <span id="wb"><span class="dot">&#x25cf;</span><span id="wbt"></span></span>
+        <span id="em"><span class="dot">&#x25cf;</span><span id="emt"></span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card back">
+    <div id="hm" style="width:100%"></div>
+    <div class="bh" id="bh"></div>
+  </div>
+
+  <div id="pBtn">
+    <button class="btn" onclick="window.print()">Print</button>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#161b22','#0e4429','#006d32','#26a641','#39d353'];
+
+function mkHeat(days) {
+  if (!days || !days.length)
+    return '<p style="color:#8b949e;font-size:10px;text-align:center">No data</p>';
+  const recent = days.slice(-364), map = {};
+  recent.forEach(d => map[d.date] = d.level || 0);
+  const start = new Date(recent[0].date);
+  start.setDate(start.getDate() - start.getDay()); // rewind to Sunday
+  const cur = new Date(start);
+  const S = 6.5, step = 7.5, cols = 53, rows = 7;
+  let r = '';
+  for (let c = 0; c < cols; c++) {
+    for (let row = 0; row < rows; row++) {
+      const s = cur.toISOString().slice(0, 10);
+      r += `<rect x="${c*step}" y="${row*step}" width="${S}" height="${S}" `
+         + `fill="${COLORS[map[s] ?? 0]}" rx="1.5"/>`;
+      cur.setDate(cur.getDate() + 1);
+    }
+  }
+  const W = cols * step - 1, H = rows * step - 1;
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" `
+       + `style="width:100%;display:block">${r}</svg>`;
+}
+
+function field(id, val, wrapId) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val || '';
+  if (wrapId) {
+    const w = document.getElementById(wrapId);
+    if (w) w.style.display = val ? '' : 'none';
+  }
+}
+
+async function go() {
+  const u = document.getElementById('u').value.trim();
+  if (!u) return;
+  const btn = document.querySelector('#ui .btn');
+  btn.textContent = 'Loading…'; btn.disabled = true;
+  try {
+    const [uRes, cRes] = await Promise.all([
+      fetch(`https://api.github.com/users/${u}`),
+      fetch(`https://github-contributions-api.jogruber.de/v4/${u}`)
+    ]);
+    const user = await uRes.json();
+    const { contributions } = await cRes.json();
+    if (user.message) throw new Error(user.message);
+
+    document.getElementById('av').src = user.avatar_url || '';
+    field('nm', user.name || u);
+    field('hd', `@${u}`);
+    field('bh', `@${u}`);
+    field('bi',  user.bio      || null, 'biWrap');
+    field('lct', user.location || null, 'lc');
+    field('wbt', user.blog     || null, 'wb');
+    field('emt', user.email    || null, 'em');
+    document.getElementById('hm').innerHTML = mkHeat(contributions);
+    document.getElementById('out').style.display = 'flex';
+  } catch (e) {
+    alert('Error: ' + (e.message || 'Could not load user'));
+  } finally {
+    btn.textContent = 'Generate'; btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
