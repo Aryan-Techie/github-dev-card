@@ -14,9 +14,7 @@
   --paper-2:#e8e1d0;
   --ink:#1b4332;
   --ink-soft:#4a6357;
-  --ink-faint:#8a9a90;
   --terminal-bg:#0d1117;
-  --terminal-line:#1c2330;
   --terminal-fg:#c9d1d9;
   --terminal-dim:#6e7681;
   --amber:#ffb454;
@@ -29,8 +27,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:var(--sans);
-  background:
-    radial-gradient(ellipse at 50% -10%, var(--page-bg-2), var(--page-bg) 60%);
+  background:radial-gradient(ellipse at 50% -10%, var(--page-bg-2), var(--page-bg) 60%);
   min-height:100vh;color:var(--terminal-fg);
   display:flex;flex-direction:column;align-items:center;
   padding:3rem 1.25rem 4rem;gap:1.75rem;
@@ -38,41 +35,48 @@ body{
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ── Prompt / input ── */
-.eyebrow{
-  font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;
-  color:var(--terminal-dim);text-transform:lowercase;
-}
-#ui{display:flex;gap:.5rem;max-width:420px;width:100%;align-items:stretch}
-.prompt-field{
-  flex:1;display:flex;align-items:center;gap:.5rem;
-  background:var(--terminal-bg);border:1px solid #262c36;border-radius:6px;
-  padding:0 .85rem;
-}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--terminal-dim);text-transform:lowercase}
+#ui{display:flex;gap:.5rem;max-width:460px;width:100%;align-items:stretch;position:relative}
+.prompt-field{flex:1;display:flex;align-items:center;gap:.5rem;background:var(--terminal-bg);
+  border:1px solid #262c36;border-radius:6px;padding:0 .85rem}
 .prompt-field span{font-family:var(--mono);color:var(--amber);font-size:.95rem;user-select:none}
-#u{
-  flex:1;padding:.7rem 0;border:none;background:transparent;color:var(--terminal-fg);
-  font:500 .95rem var(--mono);outline:none;min-width:0;
-}
+#u{flex:1;padding:.7rem 0;border:none;background:transparent;color:var(--terminal-fg);
+  font:500 .95rem var(--mono);outline:none;min-width:0}
 #u::placeholder{color:var(--terminal-dim)}
-.btn{
-  padding:.7rem 1.15rem;background:var(--amber);color:#231605;border:none;
+.btn{padding:.7rem 1.15rem;background:var(--amber);color:#231605;border:none;
   border-radius:6px;font:700 .85rem var(--mono);cursor:pointer;white-space:nowrap;
-  letter-spacing:.02em;transition:transform .1s ease, background .15s ease;
-}
-.btn:hover:not(:disabled){background:#ffc574}
+  letter-spacing:.02em;transition:transform .1s ease, background .15s ease}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
 .btn:active:not(:disabled){transform:translateY(1px)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.btn-ghost{
-  background:transparent;color:var(--terminal-fg);border:1px solid #2a313c;
-}
+.btn-ghost{background:transparent;color:var(--terminal-fg);border:1px solid #2a313c}
 .btn-ghost:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+.iconBtn{padding:.7rem .8rem;font-size:1rem;line-height:1}
 :focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
-#err{
-  max-width:420px;width:100%;font-family:var(--mono);font-size:.78rem;
-  color:var(--danger);background:rgba(229,83,75,.08);border:1px solid rgba(229,83,75,.35);
-  border-radius:6px;padding:.6rem .8rem;display:none;
+/* ── Settings panel ── */
+.settingsPanel{
+  position:absolute;top:calc(100% + 8px);right:0;z-index:10;width:250px;
+  background:var(--terminal-bg);border:1px solid #262c36;border-radius:8px;
+  padding:.9rem 1rem;box-shadow:0 12px 30px rgba(0,0,0,.5);
+  display:flex;flex-direction:column;gap:.65rem;
 }
+.settingsPanel[hidden]{display:none}
+.settingsTitle{font-family:var(--mono);font-size:.68rem;color:var(--terminal-dim);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:.15rem}
+.settingsRow{display:flex;flex-direction:column;gap:.3rem}
+.settingsRow label{font-family:var(--mono);font-size:.68rem;color:var(--terminal-fg)}
+.settingsRow select{
+  font-family:var(--mono);font-size:.78rem;padding:.4rem .5rem;border-radius:5px;
+  background:#161b22;color:var(--terminal-fg);border:1px solid #262c36;
+}
+.swatchRow{display:flex;gap:.4rem}
+.swatchBtn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+.swatchBtn.active{border-color:var(--amber)}
+
+#err{max-width:460px;width:100%;font-family:var(--mono);font-size:.78rem;
+  color:var(--danger);background:rgba(229,83,75,.08);border:1px solid rgba(229,83,75,.35);
+  border-radius:6px;padding:.6rem .8rem;display:none}
 #err.show{display:block}
 #err b{color:var(--danger)}
 
@@ -80,30 +84,28 @@ body{
 #out{display:none;flex-direction:column;align-items:center;gap:1.4rem}
 #out.show{display:flex}
 #cardsWrap{display:flex;flex-direction:column;align-items:center;gap:1.4rem}
+#cardsWrap.style-duo .singleCard{display:none}
+#cardsWrap.style-single .duoCard{display:none}
 
-.card{
-  width:3.5in;height:2in;border-radius:10px;overflow:hidden;position:relative;
+.card{width:3.5in;height:2in;border-radius:10px;overflow:hidden;position:relative;
   box-shadow:0 10px 34px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
-}
-.perf{
-  position:absolute;left:0;top:0;bottom:0;width:13px;z-index:2;
+  transition:background .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 16px 42px rgba(0,0,0,.55), 0 4px 10px rgba(0,0,0,.4)}
+.perf{position:absolute;left:0;top:0;bottom:0;width:13px;z-index:2;
   background-color:var(--hole);
   background-image:radial-gradient(circle, var(--card-under, var(--paper)) 3px, transparent 3.4px);
-  background-size:13px 13px;background-repeat:repeat-y;background-position:0 4px;
-}
+  background-size:13px 13px;background-repeat:repeat-y;background-position:0 4px}
 
-/* ── Front ── */
+/* ── Front (duo) ── */
 .front{background:var(--paper);color:var(--ink);display:flex;align-items:center;
   padding:.2in .22in .2in .34in;gap:.16in}
 .front .perf{--card-under:var(--page-bg)}
 .avatarWrap{position:relative;flex-shrink:0}
-.front img{width:.72in;height:.72in;border-radius:50%;
+.avatarImg{width:.72in;height:.72in;border-radius:50%;
   border:2px solid var(--ink);object-fit:cover;background:var(--paper-2);display:block}
-.stamp{
-  position:absolute;top:-9px;right:-14px;width:.42in;height:.42in;border-radius:50%;
+.stamp{position:absolute;top:-9px;right:-14px;width:.42in;height:.42in;border-radius:50%;
   border:1.4px dashed var(--ink-soft);display:flex;align-items:center;justify-content:center;
-  transform:rotate(-11deg);background:var(--paper);
-}
+  transform:rotate(-11deg);background:var(--paper)}
 .stamp span{font-family:var(--mono);font-size:6px;font-weight:700;line-height:1.15;
   text-align:center;color:var(--ink-soft);letter-spacing:.02em}
 
@@ -121,9 +123,9 @@ body{
   border-top:1px dashed var(--paper-2);padding-top:4px;display:flex;gap:9px}
 .info .stats b{color:var(--ink)}
 
-/* ── Back ── */
+/* ── Back (duo) ── */
 .back{background:var(--terminal-bg);display:flex;flex-direction:column;
-  justify-content:center;gap:.09in;padding:.15in .18in .15in .3in}
+  justify-content:center;gap:.09in;padding:.15in .18in .15in .3in;position:relative}
 .back .perf{--card-under:var(--page-bg)}
 .term-top{display:flex;align-items:center;gap:5px;margin-bottom:1px}
 .term-dot{width:5.5px;height:5.5px;border-radius:50%;background:#30363d}
@@ -131,12 +133,9 @@ body{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .term-line .path{color:#58a6ff}
 .cursor{display:inline-block;width:5px;height:9px;background:var(--amber);margin-left:2px;vertical-align:-1px}
-@media (prefers-reduced-motion: no-preference){
-  .cursor{animation:blink 1s steps(1) infinite}
-}
+@media (prefers-reduced-motion: no-preference){.cursor{animation:blink 1s steps(1) infinite}}
 @keyframes blink{50%{opacity:0}}
 
-#hm{width:100%}
 .legend{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:6.6px;
   color:var(--terminal-dim);justify-content:flex-end;margin-top:1px}
 .legend i{width:6px;height:6px;border-radius:1.5px;display:inline-block}
@@ -144,6 +143,26 @@ body{
 .backStats b{color:var(--amber)}
 .brand{font-family:var(--mono);font-size:6.5px;color:var(--terminal-dim);margin-top:2px}
 .brand span{color:var(--amber-dim)}
+
+.qrCode{position:absolute;bottom:.14in;right:.16in;width:.42in;height:.42in;
+  border-radius:4px;background:#fff;padding:2px;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.qrCode img{width:100%;height:100%;display:block;border-radius:2px}
+.qrCode[hidden]{display:none}
+
+/* ── Single card (condensed style) ── */
+.single{background:var(--paper);color:var(--ink);display:flex;flex-direction:column;
+  padding:.16in .2in .13in .32in;gap:.08in}
+.single .perf{--card-under:var(--page-bg)}
+.singleTop{display:flex;align-items:center;gap:.14in}
+.singleTop .avatarImg{width:.58in;height:.58in}
+.singleTop .name{font-size:12.5px}
+.singleTop .bio{-webkit-line-clamp:1;margin-bottom:0;font-size:8.5px}
+.singleBottom{display:flex;flex-direction:column;gap:2px;border-top:1px dashed var(--paper-2);padding-top:5px}
+.miniHeat{width:100%}
+.singleFoot{display:flex;justify-content:space-between;align-items:center}
+.singleFoot .backStats{color:var(--ink-soft)}
+.singleFoot .backStats b{color:var(--ink)}
+.singleFoot .legend{color:var(--ink-soft)}
 
 .pageFooter{font-family:var(--mono);font-size:.7rem;color:var(--terminal-dim)}
 .pageFooter a{color:var(--amber);text-decoration:none}
@@ -165,7 +184,8 @@ body{
   #out{display:block!important}
   #cardsWrap{display:block}
   .card{width:3.5in;height:2in;border-radius:0;box-shadow:none;break-inside:avoid}
-  .front{break-after:page}
+  .card:hover{transform:none;box-shadow:none}
+  .duoCard.front{break-after:page}
   @page{size:3.5in 2in;margin:0}
 }
 </style>
@@ -182,55 +202,119 @@ body{
            onkeydown="if(event.key==='Enter')go()">
   </div>
   <button class="btn" id="genBtn" onclick="go()">generate</button>
+  <button class="btn btn-ghost iconBtn" id="settingsBtn" aria-expanded="false"
+          aria-controls="settingsPanel" aria-label="Card settings" onclick="toggleSettings()">⚙</button>
+
+  <div class="settingsPanel" id="settingsPanel" hidden>
+    <div class="settingsTitle">theme</div>
+    <div class="swatchRow" id="themeSwatches" role="radiogroup" aria-label="Theme"></div>
+
+    <div class="settingsRow">
+      <label for="setMonths">contribution range</label>
+      <select id="setMonths" onchange="onSetting('months', this.value)">
+        <option value="3">last 3 months</option>
+        <option value="6">last 6 months</option>
+        <option value="12" selected>last 12 months</option>
+      </select>
+    </div>
+
+    <div class="settingsRow">
+      <label for="setAvatar">profile picture</label>
+      <select id="setAvatar" onchange="onSetting('avatarMode', this.value)">
+        <option value="github">GitHub avatar</option>
+        <option value="doodle">Generated doodle</option>
+      </select>
+    </div>
+
+    <div class="settingsRow">
+      <label for="setStyle">card style</label>
+      <select id="setStyle" onchange="onSetting('style', this.value)">
+        <option value="duo">Duo — badge + terminal</option>
+        <option value="single">Single — condensed</option>
+      </select>
+    </div>
+
+    <div class="settingsRow">
+      <label for="setQr">profile QR code</label>
+      <select id="setQr" onchange="onSetting('showQr', this.value)">
+        <option value="on">show on back</option>
+        <option value="off">hide</option>
+      </select>
+    </div>
+  </div>
 </div>
 
 <div id="err" role="alert"></div>
 
 <div id="out" role="status" aria-live="polite">
-  <div id="cardsWrap">
-    <div class="card front">
+  <div id="cardsWrap" class="style-duo">
+
+    <div class="card front duoCard">
       <div class="perf" aria-hidden="true"></div>
       <div class="avatarWrap">
-        <img id="av" src="" alt="">
-        <div class="stamp" id="stamp" hidden><span id="stampTxt"></span></div>
+        <img class="avatarImg" src="" alt="">
+        <div class="stamp" hidden><span data-field="stampTxt"></span></div>
       </div>
       <div class="info">
-        <div class="name"  id="nm"></div>
-        <div class="handle" id="hd"></div>
-        <div id="biWrap"><div class="bio" id="bi"></div></div>
+        <div class="name" data-field="name"></div>
+        <div class="handle" data-field="handle"></div>
+        <div><div class="bio" data-field="bio"></div></div>
         <div class="meta">
           <span id="lc" hidden><span class="dot">&#9679;</span><span id="lct"></span></span>
           <span id="wb" hidden><span class="dot">&#9679;</span><span id="wbt"></span></span>
           <span id="em" hidden><span class="dot">&#9679;</span><span id="emt"></span></span>
         </div>
         <div class="stats">
-          <span><b id="repoCount">–</b> repos</span>
-          <span><b id="followerCount">–</b> followers</span>
-          <span><b id="followingCount">–</b> following</span>
+          <span><b data-field="repoCount">–</b> repos</span>
+          <span><b data-field="followerCount">–</b> followers</span>
+          <span><b data-field="followingCount">–</b> following</span>
         </div>
       </div>
     </div>
 
-    <div class="card back">
+    <div class="card back duoCard">
       <div class="perf" aria-hidden="true"></div>
       <div class="term-top" aria-hidden="true">
         <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
-        <span class="term-line">git log --since=1y <span class="path" id="termPath">--author=user</span><span class="cursor"></span></span>
+        <span class="term-line">git log <span class="path" data-field="sinceLabel">--since=1y</span> <span class="path" data-field="authorLabel">--author=user</span><span class="cursor"></span></span>
       </div>
-      <div id="hm"></div>
-      <div class="legend" aria-hidden="true">
-        less
-        <i style="background:#161b22"></i><i style="background:#4a3418"></i>
-        <i style="background:#8a5a1e"></i><i style="background:#c98a2e"></i><i style="background:#ffb454"></i>
-        more
-      </div>
+      <div class="heatSlot"></div>
+      <div class="legendSlot legend" aria-hidden="true"></div>
       <div class="backStats">
-        <span><b id="totalContrib">–</b> contributions</span>
-        <span>streak <b id="curStreak">–</b>d</span>
-        <span>best <b id="bestStreak">–</b>d</span>
+        <span><b data-field="totalContrib">–</b> contributions</span>
+        <span>streak <b data-field="curStreak">–</b>d</span>
+        <span>best <b data-field="bestStreak">–</b>d</span>
+      </div>
+      <div class="brand" aria-hidden="true"># powered by <span>aroice.in</span></div>
+      <div class="qrCode" hidden><img alt="" /></div>
+    </div>
+
+    <div class="card single singleCard">
+      <div class="perf" aria-hidden="true"></div>
+      <div class="singleTop">
+        <div class="avatarWrap">
+          <img class="avatarImg" src="" alt="">
+          <div class="stamp" hidden><span data-field="stampTxt"></span></div>
+        </div>
+        <div class="info">
+          <div class="name" data-field="name"></div>
+          <div class="handle" data-field="handle"></div>
+          <div class="bio" data-field="bio"></div>
+        </div>
+      </div>
+      <div class="singleBottom">
+        <div class="heatSlot miniHeat"></div>
+        <div class="singleFoot">
+          <div class="backStats">
+            <span><b data-field="totalContrib">–</b> contributions</span>
+            <span>streak <b data-field="curStreak">–</b>d</span>
+          </div>
+          <div class="legendSlot legend" aria-hidden="true"></div>
+        </div>
       </div>
       <div class="brand" aria-hidden="true"># powered by <span>aroice.in</span></div>
     </div>
+
   </div>
 
   <div class="actions">
@@ -242,16 +326,59 @@ body{
 <p class="pageFooter">powered by <a href="https://aroice.in" target="_blank" rel="noopener">AROICE</a></p>
 
 <script>
-const AMBER_SCALE = ['#161b22','#4a3418','#8a5a1e','#c98a2e','#ffb454'];
+const THEMES = {
+  amber:   { label:'Amber Terminal', swatch:'#ffb454',
+             vars:{ '--paper':'#f2ede1','--paper-2':'#e8e1d0','--ink':'#1b4332','--ink-soft':'#4a6357',
+                     '--terminal-bg':'#0d1117','--terminal-fg':'#c9d1d9','--terminal-dim':'#6e7681',
+                     '--amber':'#ffb454','--amber-dim':'#7a5a2e' },
+             scale:['#161b22','#4a3418','#8a5a1e','#c98a2e','#ffb454'] },
+  emerald: { label:'Emerald Ledger', swatch:'#4ee1a0',
+             vars:{ '--paper':'#eef2ea','--paper-2':'#e0e8da','--ink':'#1e3a2b','--ink-soft':'#3f5c48',
+                     '--terminal-bg':'#0b1410','--terminal-fg':'#c8d9cd','--terminal-dim':'#5f7a68',
+                     '--amber':'#4ee1a0','--amber-dim':'#256648' },
+             scale:['#0e1a14','#134429','#1c6b3b','#2c9a54','#4ee1a0'] },
+  violet:  { label:'Violet Signal', swatch:'#c084fc',
+             vars:{ '--paper':'#efeaf4','--paper-2':'#e2dae9','--ink':'#3a2657','--ink-soft':'#5e4a7c',
+                     '--terminal-bg':'#120f1c','--terminal-fg':'#d6cfe4','--terminal-dim':'#7a6f92',
+                     '--amber':'#c084fc','--amber-dim':'#5b3d80' },
+             scale:['#1a1424','#3b215c','#5c2f8a','#8a4cc4','#c084fc'] },
+  mono:    { label:'Mono Noir', swatch:'#e5e5e5',
+             vars:{ '--paper':'#eeeeee','--paper-2':'#dddddd','--ink':'#1a1a1a','--ink-soft':'#4d4d4d',
+                     '--terminal-bg':'#0e0e0e','--terminal-fg':'#d4d4d4','--terminal-dim':'#707070',
+                     '--amber':'#e5e5e5','--amber-dim':'#6b6b6b' },
+             scale:['#161616','#3a3a3a','#5e5e5e','#8c8c8c','#e5e5e5'] }
+};
 const AVATAR_COLORS = ['#3a5a45','#7a5a2e','#4a3d5c','#5c3a3a','#2e4a5c','#5c4a2e'];
+
+const settings = { theme:'amber', months:12, avatarMode:'github', style:'duo', showQr:'on' };
 const cache = new Map();
 let controller = null;
 let currentUsername = '';
+let lastResult = null;
 
+/* ---------- persistence (personal, best-effort) ---------- */
+async function loadSettings(){
+  try{
+    const r = await window.storage.get('devcard:settings');
+    if (r && r.value) Object.assign(settings, JSON.parse(r.value));
+  } catch { /* no saved settings yet */ }
+}
+function saveSettings(){
+  window.storage.set('devcard:settings', JSON.stringify(settings), false).catch(() => {});
+}
+
+/* ---------- avatars ---------- */
+function seededRand(seed){
+  let s = seed;
+  return () => { s = (s * 1103515245 + 12345) >>> 0; return (s % 100000) / 100000; };
+}
+function hashStr(label){
+  let h = 0;
+  for (const ch of label) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h;
+}
 function initialsAvatar(label){
-  let hash = 0;
-  for (const ch of label) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  const bg = AVATAR_COLORS[hash % AVATAR_COLORS.length];
+  const bg = AVATAR_COLORS[hashStr(label) % AVATAR_COLORS.length];
   const initials = (label.match(/[a-zA-Z0-9]+/g) || [label])
     .slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">`
@@ -260,7 +387,78 @@ function initialsAvatar(label){
     + `fill="#f2ede1" text-anchor="middle">${initials}</text></svg>`;
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
+function doodleAvatar(label){
+  const scale = THEMES[settings.theme].scale;
+  const rand = seededRand(hashStr(label) || 1);
+  const bg = scale[1];
+  let shapes = '';
+  const count = 4 + Math.floor(rand() * 3);
+  for (let i = 0; i < count; i++) {
+    const cx = 18 + rand() * 64, cy = 18 + rand() * 64, r = 7 + rand() * 15;
+    const color = scale[2 + Math.floor(rand() * 3)];
+    const kind = rand();
+    if (kind < 0.4) {
+      shapes += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${color}" opacity="0.88"/>`;
+    } else if (kind < 0.7) {
+      const rot = Math.floor(rand() * 45);
+      shapes += `<rect x="${(cx - r).toFixed(1)}" y="${(cy - r).toFixed(1)}" width="${(r * 2).toFixed(1)}" `
+        + `height="${(r * 2).toFixed(1)}" rx="4" fill="${color}" opacity="0.88" transform="rotate(${rot} ${cx.toFixed(1)} ${cy.toFixed(1)})"/>`;
+    } else {
+      shapes += `<polygon points="${cx.toFixed(1)},${(cy - r).toFixed(1)} ${(cx + r).toFixed(1)},${(cy + r).toFixed(1)} `
+        + `${(cx - r).toFixed(1)},${(cy + r).toFixed(1)}" fill="${color}" opacity="0.88"/>`;
+    }
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">`
+    + `<rect width="100" height="100" fill="${bg}"/>${shapes}</svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+function applyAvatars(){
+  if (!lastResult) return;
+  const { user } = lastResult;
+  document.querySelectorAll('.avatarImg').forEach(img => {
+    img.onerror = null;
+    if (settings.avatarMode === 'doodle') {
+      img.removeAttribute('crossorigin');
+      img.src = doodleAvatar(currentUsername);
+      img.alt = `Generated doodle avatar for ${currentUsername}`;
+    } else {
+      img.crossOrigin = 'anonymous';
+      img.alt = `GitHub avatar for ${currentUsername}`;
+      img.onerror = function(){
+        this.onerror = null;
+        this.removeAttribute('crossorigin');
+        this.src = initialsAvatar(user.name || currentUsername);
+      };
+      img.src = user.avatar_url
+        ? `${user.avatar_url}${user.avatar_url.includes('?') ? '&' : '?'}c=${Date.now()}`
+        : initialsAvatar(user.name || currentUsername);
+    }
+  });
+}
 
+/* ---------- profile QR code ---------- */
+function applyQrCode(){
+  const wrap = document.querySelector('.qrCode');
+  if (!wrap) return;
+  if (settings.showQr === 'off' || !currentUsername) {
+    wrap.hidden = true;
+    return;
+  }
+  const profileUrl = `https://github.com/${currentUsername}`;
+  const img = wrap.querySelector('img');
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=0&data=${encodeURIComponent(profileUrl)}`;
+  img.alt = `QR code linking to ${profileUrl}`;
+  wrap.hidden = false;
+}
+
+/* ---------- stats + heatmap ---------- */
+function daysInRange(contributions, months){
+  if (!contributions.length) return [];
+  const end = new Date(contributions[contributions.length - 1].date);
+  const cutoff = new Date(end);
+  cutoff.setMonth(cutoff.getMonth() - months);
+  return contributions.filter(d => new Date(d.date) >= cutoff);
+}
 function computeStats(days){
   if (!days || !days.length) return { total: 0, current: 0, longest: 0 };
   let total = 0, longest = 0, run = 0;
@@ -276,26 +474,27 @@ function computeStats(days){
   }
   return { total, current, longest };
 }
-
-function mkHeat(days){
+function mkHeat(days, scale){
   if (!days || !days.length)
     return '<p style="color:var(--terminal-dim);font-size:9px;font-family:var(--mono)">no contribution data available</p>';
 
-  const recent = days.slice(-364);
   const map = {};
-  recent.forEach(d => map[d.date] = { level: d.level || 0, count: d.count ?? 0 });
+  days.forEach(d => map[d.date] = { level: d.level || 0, count: d.count ?? 0 });
 
-  const start = new Date(recent[0].date);
+  const start = new Date(days[0].date);
   start.setDate(start.getDate() - start.getDay());
+  const end = new Date(days[days.length - 1].date);
+  const spanDays = Math.ceil((end - start) / 86400000) + 1;
+  const cols = Math.max(1, Math.ceil(spanDays / 7));
   const cur = new Date(start);
 
-  const S = 6.2, step = 7.3, cols = 53, rows = 7, topPad = 11, leftPad = 15;
-  let cells = '', months = '';
+  const S = 6.2, step = 7.3, rows = 7, topPad = 11, leftPad = 15;
+  let cells = '', monthLabels = '';
   let lastMonth = -1;
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const dayLabels = { 1: 'Mon', 3: 'Wed', 5: 'Fri' };
+  const dayLabelRows = { 1: 'Mon', 3: 'Wed', 5: 'Fri' };
   let dayLbls = '';
-  Object.entries(dayLabels).forEach(([row, label]) => {
+  Object.entries(dayLabelRows).forEach(([row, label]) => {
     dayLbls += `<text x="0" y="${topPad + row * step + 4.5}" font-size="6" `
       + `fill="var(--terminal-dim)" font-family="monospace">${label}</text>`;
   });
@@ -303,36 +502,36 @@ function mkHeat(days){
   for (let c = 0; c < cols; c++) {
     const colDate = new Date(cur);
     if (colDate.getMonth() !== lastMonth) {
-      months += `<text x="${leftPad + c * step}" y="${topPad - 3}" font-size="6.2" `
+      monthLabels += `<text x="${leftPad + c * step}" y="${topPad - 3}" font-size="6.2" `
         + `fill="var(--terminal-dim)" font-family="monospace">${monthNames[colDate.getMonth()]}</text>`;
       lastMonth = colDate.getMonth();
     }
     for (let row = 0; row < rows; row++) {
       const s = cur.toISOString().slice(0, 10);
       const entry = map[s];
-      const fill = AMBER_SCALE[entry ? entry.level : 0];
+      const fill = scale[entry ? entry.level : 0];
       const label = entry
         ? `${s}: ${entry.count} contribution${entry.count === 1 ? '' : 's'}`
         : `${s}: no data`;
       cells += `<rect x="${leftPad + c * step}" y="${topPad + row * step}" `
-        + `width="${S}" height="${S}" fill="${fill}" rx="1.3">`
-        + `<title>${label}</title></rect>`;
+        + `width="${S}" height="${S}" fill="${fill}" rx="1.3"><title>${label}</title></rect>`;
       cur.setDate(cur.getDate() + 1);
     }
   }
 
   const W = leftPad + cols * step - 1, H = topPad + rows * step - 1;
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" `
-    + `role="img" aria-label="Contribution heatmap for the past year" `
-    + `style="width:100%;display:block">${months}${dayLbls}${cells}</svg>`;
+    + `role="img" aria-label="Contribution heatmap" style="width:100%;display:block">`
+    + `${monthLabels}${dayLbls}${cells}</svg>`;
+}
+function renderLegend(scale){
+  return 'less ' + scale.map(c => `<i style="background:${c}"></i>`).join('') + ' more';
 }
 
-function field(id, val, wrapId){
-  const el = document.getElementById(id);
-  if (el) el.textContent = val || '';
-  if (wrapId) document.getElementById(wrapId).hidden = !val;
+/* ---------- field helpers ---------- */
+function setFields(name, value){
+  document.querySelectorAll(`[data-field="${name}"]`).forEach(el => el.textContent = value ?? '');
 }
-
 function showError(msg){
   const el = document.getElementById('err');
   el.innerHTML = msg;
@@ -342,21 +541,82 @@ function clearError(){
   document.getElementById('err').classList.remove('show');
   document.getElementById('err').innerHTML = '';
 }
-
 function showSkeleton(){
   document.getElementById('out').classList.add('show');
-  ['nm','hd'].forEach(id => document.getElementById(id).innerHTML =
-    '<span class="skel" style="display:inline-block;width:70px;height:10px"></span>');
-  document.getElementById('bi').innerHTML =
-    '<span class="skel" style="display:inline-block;width:100%;height:16px"></span>';
-  document.getElementById('biWrap').hidden = false;
-  document.getElementById('av').src = '';
+  setFields('name', '');
+  document.querySelectorAll('[data-field="name"], [data-field="handle"]').forEach(el =>
+    el.innerHTML = '<span class="skel" style="display:inline-block;width:70px;height:10px"></span>');
+  document.querySelectorAll('[data-field="bio"]').forEach(el =>
+    el.innerHTML = '<span class="skel" style="display:inline-block;width:100%;height:14px"></span>');
+  document.querySelectorAll('.avatarImg').forEach(img => img.src = '');
   ['lc','wb','em'].forEach(id => document.getElementById(id).hidden = true);
-  document.getElementById('stamp').hidden = true;
-  document.getElementById('hm').innerHTML =
-    '<div class="skel" style="width:100%;height:56px"></div>';
+  document.querySelectorAll('.stamp').forEach(el => el.hidden = true);
+  document.querySelectorAll('.qrCode').forEach(el => el.hidden = true);
+  document.querySelectorAll('.heatSlot').forEach(el =>
+    el.innerHTML = '<div class="skel" style="width:100%;height:56px"></div>');
 }
 
+/* ---------- theme + settings ---------- */
+function applyTheme(name){
+  const t = THEMES[name] || THEMES.amber;
+  Object.entries(t.vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+  document.querySelectorAll('#themeSwatches .swatchBtn').forEach(b =>
+    b.classList.toggle('active', b.dataset.theme === name));
+}
+function buildThemeSwatches(){
+  const wrap = document.getElementById('themeSwatches');
+  wrap.innerHTML = Object.entries(THEMES).map(([key, t]) =>
+    `<button type="button" class="swatchBtn" data-theme="${key}" title="${t.label}" `
+    + `aria-label="${t.label}" style="background:${t.swatch}" onclick="onSetting('theme','${key}')"></button>`
+  ).join('');
+}
+function refreshFromSettings(){
+  if (!lastResult) return;
+  const scale = THEMES[settings.theme].scale;
+  const ranged = daysInRange(lastResult.contributions, settings.months);
+  const heatHtml = mkHeat(ranged, scale);
+  document.querySelectorAll('.heatSlot').forEach(el => el.innerHTML = heatHtml);
+  document.querySelectorAll('.legendSlot').forEach(el => el.innerHTML = renderLegend(scale));
+  const stats = computeStats(ranged);
+  setFields('totalContrib', stats.total);
+  setFields('curStreak', stats.current);
+  setFields('bestStreak', stats.longest);
+  setFields('sinceLabel', `--since=${settings.months === 12 ? '1y' : settings.months + 'mo'}`);
+  applyQrCode();
+}
+function toggleSettings(){
+  const panel = document.getElementById('settingsPanel');
+  const btn = document.getElementById('settingsBtn');
+  const willShow = panel.hidden;
+  panel.hidden = !willShow;
+  btn.setAttribute('aria-expanded', String(willShow));
+}
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('settingsPanel');
+  if (!panel.hidden && !panel.contains(e.target) && e.target.id !== 'settingsBtn') {
+    panel.hidden = true;
+    document.getElementById('settingsBtn').setAttribute('aria-expanded', 'false');
+  }
+});
+function onSetting(key, value){
+  settings[key] = key === 'months' ? parseInt(value, 10) : value;
+  if (key === 'theme') { applyTheme(value); if (settings.avatarMode === 'doodle') applyAvatars(); }
+  if (key === 'style') document.getElementById('cardsWrap').className = 'style-' + value;
+  if (key === 'avatarMode') applyAvatars();
+  if (key === 'showQr') applyQrCode();
+  refreshFromSettings();
+  saveSettings();
+}
+function syncSettingsUI(){
+  document.getElementById('setMonths').value = String(settings.months);
+  document.getElementById('setAvatar').value = settings.avatarMode;
+  document.getElementById('setStyle').value = settings.style;
+  document.getElementById('setQr').value = settings.showQr;
+  document.getElementById('cardsWrap').className = 'style-' + settings.style;
+  applyTheme(settings.theme);
+}
+
+/* ---------- fetch + render ---------- */
 async function go(){
   const raw = document.getElementById('u').value.trim();
   const u = raw.replace(/^@/, '');
@@ -378,14 +638,18 @@ async function go(){
 
   const key = u.toLowerCase();
   if (cache.has(key)) {
-    render(cache.get(key));
+    lastResult = cache.get(key);
+    render(lastResult);
     btn.textContent = 'generate'; btn.disabled = false;
     return;
   }
 
+  // y=last requests GitHub's rolling last-12-months window (not the partial
+  // calendar year), and the timestamp param busts any stale HTTP cache —
+  // together these are what keep the graph showing genuinely current data.
   const [userRes, contribRes] = await Promise.allSettled([
     fetch(`https://api.github.com/users/${u}`, { signal }),
-    fetch(`https://github-contributions-api.jogruber.de/v4/${u}`, { signal })
+    fetch(`https://github-contributions-api.jogruber.de/v4/${u}?y=last&_=${Date.now()}`, { signal })
   ]);
 
   if (signal.aborted) return;
@@ -418,60 +682,45 @@ async function go(){
   if (contribRes.status === 'fulfilled') {
     try {
       const data = await contribRes.value.json();
-      contributions = data.contributions || [];
+      contributions = (data.contributions || []).sort((a, b) => a.date.localeCompare(b.date));
     } catch { contributions = []; }
   }
 
-  const result = { user, contributions };
-  cache.set(key, result);
-  render(result);
+  lastResult = { user, contributions };
+  cache.set(key, lastResult);
+  render(lastResult);
   btn.textContent = 'generate'; btn.disabled = false;
 }
 
-function render({ user, contributions }){
+function render({ user }){
   const u = currentUsername;
-  const avEl = document.getElementById('av');
-  avEl.crossOrigin = 'anonymous';
-  avEl.alt = `GitHub avatar for ${u}`;
-  avEl.onerror = function(){
-    this.onerror = null;
-    this.removeAttribute('crossorigin');
-    this.src = initialsAvatar(user.name || u);
-  };
-  // cache-bust so the request is re-issued with crossOrigin set (a prior
-  // non-CORS load of the same URL would otherwise be served from cache
-  // without the access-control headers html2canvas needs)
-  avEl.src = user.avatar_url ? `${user.avatar_url}${user.avatar_url.includes('?') ? '&' : '?'}c=${Date.now()}`
-    : initialsAvatar(user.name || u);
-
-  field('nm', user.name || u);
-  field('hd', `@${u}`);
-  field('bi', user.bio || null, 'biWrap');
+  setFields('name', user.name || u);
+  setFields('handle', `@${u}`);
+  setFields('bio', user.bio || '');
   field('lct', user.location || null, 'lc');
   field('wbt', user.blog || null, 'wb');
   field('emt', user.email || null, 'em');
-
-  document.getElementById('repoCount').textContent = user.public_repos ?? '–';
-  document.getElementById('followerCount').textContent = user.followers ?? '–';
-  document.getElementById('followingCount').textContent = user.following ?? '–';
+  setFields('repoCount', user.public_repos ?? '–');
+  setFields('followerCount', user.followers ?? '–');
+  setFields('followingCount', user.following ?? '–');
+  setFields('authorLabel', `--author=${u}`);
 
   if (user.created_at) {
-    const year = new Date(user.created_at).getFullYear();
-    document.getElementById('stampTxt').textContent = `MEMBER SINCE ${year}`;
-    document.getElementById('stamp').hidden = false;
+    setFields('stampTxt', `MEMBER SINCE ${new Date(user.created_at).getFullYear()}`);
+    document.querySelectorAll('.stamp').forEach(el => el.hidden = false);
   } else {
-    document.getElementById('stamp').hidden = true;
+    document.querySelectorAll('.stamp').forEach(el => el.hidden = true);
   }
 
-  document.getElementById('termPath').textContent = `--author=${u}`;
-  document.getElementById('hm').innerHTML = mkHeat(contributions);
-
-  const stats = computeStats(contributions.slice(-364));
-  document.getElementById('totalContrib').textContent = stats.total;
-  document.getElementById('curStreak').textContent = stats.current;
-  document.getElementById('bestStreak').textContent = stats.longest;
-
+  applyAvatars();
+  refreshFromSettings();
   document.getElementById('out').classList.add('show');
+}
+function field(id, val, wrapId){
+  const el = document.getElementById(id);
+  const inner = el.querySelector('span:last-child');
+  if (inner) inner.textContent = val || '';
+  if (wrapId) document.getElementById(wrapId).hidden = !val;
 }
 
 function saveImage(){
@@ -488,6 +737,13 @@ function saveImage(){
     })
     .catch(() => showError('<b>export failed —</b> try again, or use print instead.'));
 }
+
+/* ---------- init ---------- */
+(async function init(){
+  buildThemeSwatches();
+  await loadSettings();
+  syncSettingsUI();
+})();
 </script>
 </body>
 </html>
