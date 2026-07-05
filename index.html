@@ -2,152 +2,475 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GitHub Dev Card</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Dev Card — GitHub ID Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
+:root{
+  --page-bg:#0a0e14;
+  --page-bg-2:#0d131b;
+  --paper:#f2ede1;
+  --paper-2:#e8e1d0;
+  --ink:#1b4332;
+  --ink-soft:#4a6357;
+  --ink-faint:#8a9a90;
+  --terminal-bg:#0d1117;
+  --terminal-line:#1c2330;
+  --terminal-fg:#c9d1d9;
+  --terminal-dim:#6e7681;
+  --amber:#ffb454;
+  --amber-dim:#7a5a2e;
+  --danger:#e5534b;
+  --hole:#0a0e14;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:#f6f8fa;min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;padding:2rem;gap:1.5rem}
-#ui{display:flex;gap:.5rem;max-width:400px;width:100%}
-#u{flex:1;padding:.55rem 1rem;border:1px solid #d0d7de;border-radius:6px;
-  font:inherit;font-size:.95rem;outline:none;background:#fff}
-#u:focus{border-color:#2da44e;box-shadow:0 0 0 3px rgba(45,164,78,.2)}
-.btn{padding:.55rem 1.2rem;background:#2da44e;color:#fff;border:none;
-  border-radius:6px;font:600 .95rem 'Inter',sans-serif;cursor:pointer;white-space:nowrap}
-.btn:hover{background:#2c974b}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-#out{display:none;flex-direction:column;align-items:center;gap:1.2rem}
-/* ── Card shell ── */
-.card{width:3.5in;height:2in;border-radius:10px;overflow:hidden;
-  box-shadow:0 4px 24px rgba(0,0,0,.14)}
+body{
+  font-family:var(--sans);
+  background:
+    radial-gradient(ellipse at 50% -10%, var(--page-bg-2), var(--page-bg) 60%);
+  min-height:100vh;color:var(--terminal-fg);
+  display:flex;flex-direction:column;align-items:center;
+  padding:3rem 1.25rem 4rem;gap:1.75rem;
+}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ── Prompt / input ── */
+.eyebrow{
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;
+  color:var(--terminal-dim);text-transform:lowercase;
+}
+#ui{display:flex;gap:.5rem;max-width:420px;width:100%;align-items:stretch}
+.prompt-field{
+  flex:1;display:flex;align-items:center;gap:.5rem;
+  background:var(--terminal-bg);border:1px solid #262c36;border-radius:6px;
+  padding:0 .85rem;
+}
+.prompt-field span{font-family:var(--mono);color:var(--amber);font-size:.95rem;user-select:none}
+#u{
+  flex:1;padding:.7rem 0;border:none;background:transparent;color:var(--terminal-fg);
+  font:500 .95rem var(--mono);outline:none;min-width:0;
+}
+#u::placeholder{color:var(--terminal-dim)}
+.btn{
+  padding:.7rem 1.15rem;background:var(--amber);color:#231605;border:none;
+  border-radius:6px;font:700 .85rem var(--mono);cursor:pointer;white-space:nowrap;
+  letter-spacing:.02em;transition:transform .1s ease, background .15s ease;
+}
+.btn:hover:not(:disabled){background:#ffc574}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-ghost{
+  background:transparent;color:var(--terminal-fg);border:1px solid #2a313c;
+}
+.btn-ghost:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+#err{
+  max-width:420px;width:100%;font-family:var(--mono);font-size:.78rem;
+  color:var(--danger);background:rgba(229,83,75,.08);border:1px solid rgba(229,83,75,.35);
+  border-radius:6px;padding:.6rem .8rem;display:none;
+}
+#err.show{display:block}
+#err b{color:var(--danger)}
+
+/* ── Output ── */
+#out{display:none;flex-direction:column;align-items:center;gap:1.4rem}
+#out.show{display:flex}
+#cardsWrap{display:flex;flex-direction:column;align-items:center;gap:1.4rem}
+
+.card{
+  width:3.5in;height:2in;border-radius:10px;overflow:hidden;position:relative;
+  box-shadow:0 10px 34px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
+}
+.perf{
+  position:absolute;left:0;top:0;bottom:0;width:13px;z-index:2;
+  background-color:var(--hole);
+  background-image:radial-gradient(circle, var(--card-under, var(--paper)) 3px, transparent 3.4px);
+  background-size:13px 13px;background-repeat:repeat-y;background-position:0 4px;
+}
+
 /* ── Front ── */
-.front{background:#fff;border:1px solid #e6e8eb;display:flex;
-  align-items:center;padding:.2in .22in;gap:.18in}
-.front img{width:.74in;height:.74in;border-radius:50%;
-  border:2.5px solid #2da44e;flex-shrink:0;object-fit:cover}
+.front{background:var(--paper);color:var(--ink);display:flex;align-items:center;
+  padding:.2in .22in .2in .34in;gap:.16in}
+.front .perf{--card-under:var(--page-bg)}
+.avatarWrap{position:relative;flex-shrink:0}
+.front img{width:.72in;height:.72in;border-radius:50%;
+  border:2px solid var(--ink);object-fit:cover;background:var(--paper-2);display:block}
+.stamp{
+  position:absolute;top:-9px;right:-14px;width:.42in;height:.42in;border-radius:50%;
+  border:1.4px dashed var(--ink-soft);display:flex;align-items:center;justify-content:center;
+  transform:rotate(-11deg);background:var(--paper);
+}
+.stamp span{font-family:var(--mono);font-size:6px;font-weight:700;line-height:1.15;
+  text-align:center;color:var(--ink-soft);letter-spacing:.02em}
+
 .info{flex:1;min-width:0}
-.info .name{font-size:14px;font-weight:700;color:#24292f;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.info .handle{font-size:10.5px;color:#2da44e;font-weight:600;margin:2px 0 5px}
-.info .bio{font-size:9px;color:#57606a;line-height:1.4;margin-bottom:5px;
+.info .name{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.info .handle{font-family:var(--mono);font-size:10px;color:var(--ink-soft);font-weight:500;margin:1px 0 5px}
+.info .bio{font-size:9px;color:var(--ink);opacity:.82;line-height:1.4;margin-bottom:5px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.info .meta{display:flex;flex-direction:column;gap:2px}
-.info .meta span{font-size:8.5px;color:#57606a;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis}
-.info .meta .dot{color:#2da44e;font-size:9px;margin-right:4px}
+.info .meta{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+.info .meta span{font-size:8.5px;color:var(--ink-soft);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;font-family:var(--sans)}
+.info .meta .dot{color:var(--ink);font-size:8px;margin-right:5px}
+.info .stats{font-family:var(--mono);font-size:8px;color:var(--ink-soft);
+  border-top:1px dashed var(--paper-2);padding-top:4px;display:flex;gap:9px}
+.info .stats b{color:var(--ink)}
+
 /* ── Back ── */
-.back{background:#0d1117;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:.13in;padding:.16in .2in}
-.bh{color:#58a6ff;font-size:11px;font-weight:600;letter-spacing:.5px}
+.back{background:var(--terminal-bg);display:flex;flex-direction:column;
+  justify-content:center;gap:.09in;padding:.15in .18in .15in .3in}
+.back .perf{--card-under:var(--page-bg)}
+.term-top{display:flex;align-items:center;gap:5px;margin-bottom:1px}
+.term-dot{width:5.5px;height:5.5px;border-radius:50%;background:#30363d}
+.term-line{font-family:var(--mono);font-size:8.5px;color:var(--terminal-dim);margin-left:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term-line .path{color:#58a6ff}
+.cursor{display:inline-block;width:5px;height:9px;background:var(--amber);margin-left:2px;vertical-align:-1px}
+@media (prefers-reduced-motion: no-preference){
+  .cursor{animation:blink 1s steps(1) infinite}
+}
+@keyframes blink{50%{opacity:0}}
+
+#hm{width:100%}
+.legend{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:6.6px;
+  color:var(--terminal-dim);justify-content:flex-end;margin-top:1px}
+.legend i{width:6px;height:6px;border-radius:1.5px;display:inline-block}
+.backStats{font-family:var(--mono);font-size:8px;color:var(--terminal-fg);display:flex;gap:10px}
+.backStats b{color:var(--amber)}
+
+/* ── Skeleton ── */
+.skel{background:linear-gradient(90deg,#e4ddc9 25%,#efe9d8 37%,#e4ddc9 63%);
+  background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:4px}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+@media (prefers-reduced-motion: reduce){.skel{animation:none}}
+
+.actions{display:flex;gap:.5rem}
+
 /* ── Print ── */
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;padding:0;margin:0;display:block}
-  #ui,#pBtn{display:none!important}
+  #ui,#err,.actions,.eyebrow{display:none!important}
   #out{display:block!important}
-  .card{width:3.5in;height:2in;border-radius:0;box-shadow:none}
-  .front{page-break-after:always;break-after:page}
-  .back{page-break-before:always;break-before:page}
+  #cardsWrap{display:block}
+  .card{width:3.5in;height:2in;border-radius:0;box-shadow:none;break-inside:avoid}
+  .front{break-after:page}
   @page{size:3.5in 2in;margin:0}
 }
 </style>
 </head>
 <body>
 
+<p class="eyebrow">// paste a github handle, get a printable id card</p>
+
 <div id="ui">
-  <input id="u" placeholder="GitHub username" onkeydown="if(event.key==='Enter')go()">
-  <button class="btn" onclick="go()">Generate</button>
+  <div class="prompt-field">
+    <span aria-hidden="true">$</span>
+    <label for="u" class="visually-hidden">GitHub username</label>
+    <input id="u" placeholder="octocat" autocomplete="off" spellcheck="false"
+           onkeydown="if(event.key==='Enter')go()">
+  </div>
+  <button class="btn" id="genBtn" onclick="go()">generate</button>
 </div>
 
-<div id="out">
-  <div class="card front">
-    <img id="av" src="" alt="">
-    <div class="info">
-      <div class="name"  id="nm"></div>
-      <div class="handle" id="hd"></div>
-      <div id="biWrap"><div class="bio" id="bi"></div></div>
-      <div class="meta">
-        <span id="lc"><span class="dot">&#x25cf;</span><span id="lct"></span></span>
-        <span id="wb"><span class="dot">&#x25cf;</span><span id="wbt"></span></span>
-        <span id="em"><span class="dot">&#x25cf;</span><span id="emt"></span></span>
+<div id="err" role="alert"></div>
+
+<div id="out" role="status" aria-live="polite">
+  <div id="cardsWrap">
+    <div class="card front">
+      <div class="perf" aria-hidden="true"></div>
+      <div class="avatarWrap">
+        <img id="av" src="" alt="">
+        <div class="stamp" id="stamp" hidden><span id="stampTxt"></span></div>
+      </div>
+      <div class="info">
+        <div class="name"  id="nm"></div>
+        <div class="handle" id="hd"></div>
+        <div id="biWrap"><div class="bio" id="bi"></div></div>
+        <div class="meta">
+          <span id="lc" hidden><span class="dot">&#9679;</span><span id="lct"></span></span>
+          <span id="wb" hidden><span class="dot">&#9679;</span><span id="wbt"></span></span>
+          <span id="em" hidden><span class="dot">&#9679;</span><span id="emt"></span></span>
+        </div>
+        <div class="stats">
+          <span><b id="repoCount">–</b> repos</span>
+          <span><b id="followerCount">–</b> followers</span>
+          <span><b id="followingCount">–</b> following</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card back">
+      <div class="perf" aria-hidden="true"></div>
+      <div class="term-top" aria-hidden="true">
+        <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+        <span class="term-line">git log --since=1y <span class="path" id="termPath">--author=user</span><span class="cursor"></span></span>
+      </div>
+      <div id="hm"></div>
+      <div class="legend" aria-hidden="true">
+        less
+        <i style="background:#161b22"></i><i style="background:#4a3418"></i>
+        <i style="background:#8a5a1e"></i><i style="background:#c98a2e"></i><i style="background:#ffb454"></i>
+        more
+      </div>
+      <div class="backStats">
+        <span><b id="totalContrib">–</b> contributions</span>
+        <span>streak <b id="curStreak">–</b>d</span>
+        <span>best <b id="bestStreak">–</b>d</span>
       </div>
     </div>
   </div>
 
-  <div class="card back">
-    <div id="hm" style="width:100%"></div>
-    <div class="bh" id="bh"></div>
-  </div>
-
-  <div id="pBtn">
-    <button class="btn" onclick="window.print()">Print</button>
+  <div class="actions">
+    <button class="btn btn-ghost" onclick="saveImage()">save png</button>
+    <button class="btn btn-ghost" onclick="window.print()">print</button>
   </div>
 </div>
 
 <script>
-const COLORS = ['#161b22','#0e4429','#006d32','#26a641','#39d353'];
+const AMBER_SCALE = ['#161b22','#4a3418','#8a5a1e','#c98a2e','#ffb454'];
+const AVATAR_COLORS = ['#3a5a45','#7a5a2e','#4a3d5c','#5c3a3a','#2e4a5c','#5c4a2e'];
+const cache = new Map();
+let controller = null;
+let currentUsername = '';
 
-function mkHeat(days) {
+function initialsAvatar(label){
+  let hash = 0;
+  for (const ch of label) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  const bg = AVATAR_COLORS[hash % AVATAR_COLORS.length];
+  const initials = (label.match(/[a-zA-Z0-9]+/g) || [label])
+    .slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">`
+    + `<rect width="100" height="100" fill="${bg}"/>`
+    + `<text x="50" y="60" font-family="monospace" font-size="34" font-weight="700" `
+    + `fill="#f2ede1" text-anchor="middle">${initials}</text></svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+function computeStats(days){
+  if (!days || !days.length) return { total: 0, current: 0, longest: 0 };
+  let total = 0, longest = 0, run = 0;
+  days.forEach(d => {
+    const c = d.count ?? (d.level > 0 ? 1 : 0);
+    total += c;
+    if (c > 0) { run++; longest = Math.max(longest, run); } else run = 0;
+  });
+  let current = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    const c = days[i].count ?? (days[i].level > 0 ? 1 : 0);
+    if (c > 0) current++; else break;
+  }
+  return { total, current, longest };
+}
+
+function mkHeat(days){
   if (!days || !days.length)
-    return '<p style="color:#8b949e;font-size:10px;text-align:center">No data</p>';
-  const recent = days.slice(-364), map = {};
-  recent.forEach(d => map[d.date] = d.level || 0);
+    return '<p style="color:var(--terminal-dim);font-size:9px;font-family:var(--mono)">no contribution data available</p>';
+
+  const recent = days.slice(-364);
+  const map = {};
+  recent.forEach(d => map[d.date] = { level: d.level || 0, count: d.count ?? 0 });
+
   const start = new Date(recent[0].date);
-  start.setDate(start.getDate() - start.getDay()); // rewind to Sunday
+  start.setDate(start.getDate() - start.getDay());
   const cur = new Date(start);
-  const S = 6.5, step = 7.5, cols = 53, rows = 7;
-  let r = '';
+
+  const S = 6.2, step = 7.3, cols = 53, rows = 7, topPad = 11, leftPad = 15;
+  let cells = '', months = '';
+  let lastMonth = -1;
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dayLabels = { 1: 'Mon', 3: 'Wed', 5: 'Fri' };
+  let dayLbls = '';
+  Object.entries(dayLabels).forEach(([row, label]) => {
+    dayLbls += `<text x="0" y="${topPad + row * step + 4.5}" font-size="6" `
+      + `fill="var(--terminal-dim)" font-family="monospace">${label}</text>`;
+  });
+
   for (let c = 0; c < cols; c++) {
+    const colDate = new Date(cur);
+    if (colDate.getMonth() !== lastMonth) {
+      months += `<text x="${leftPad + c * step}" y="${topPad - 3}" font-size="6.2" `
+        + `fill="var(--terminal-dim)" font-family="monospace">${monthNames[colDate.getMonth()]}</text>`;
+      lastMonth = colDate.getMonth();
+    }
     for (let row = 0; row < rows; row++) {
       const s = cur.toISOString().slice(0, 10);
-      r += `<rect x="${c*step}" y="${row*step}" width="${S}" height="${S}" `
-         + `fill="${COLORS[map[s] ?? 0]}" rx="1.5"/>`;
+      const entry = map[s];
+      const fill = AMBER_SCALE[entry ? entry.level : 0];
+      const label = entry
+        ? `${s}: ${entry.count} contribution${entry.count === 1 ? '' : 's'}`
+        : `${s}: no data`;
+      cells += `<rect x="${leftPad + c * step}" y="${topPad + row * step}" `
+        + `width="${S}" height="${S}" fill="${fill}" rx="1.3">`
+        + `<title>${label}</title></rect>`;
       cur.setDate(cur.getDate() + 1);
     }
   }
-  const W = cols * step - 1, H = rows * step - 1;
+
+  const W = leftPad + cols * step - 1, H = topPad + rows * step - 1;
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" `
-       + `style="width:100%;display:block">${r}</svg>`;
+    + `role="img" aria-label="Contribution heatmap for the past year" `
+    + `style="width:100%;display:block">${months}${dayLbls}${cells}</svg>`;
 }
 
-function field(id, val, wrapId) {
+function field(id, val, wrapId){
   const el = document.getElementById(id);
   if (el) el.textContent = val || '';
-  if (wrapId) {
-    const w = document.getElementById(wrapId);
-    if (w) w.style.display = val ? '' : 'none';
-  }
+  if (wrapId) document.getElementById(wrapId).hidden = !val;
 }
 
-async function go() {
-  const u = document.getElementById('u').value.trim();
-  if (!u) return;
-  const btn = document.querySelector('#ui .btn');
-  btn.textContent = 'Loading…'; btn.disabled = true;
-  try {
-    const [uRes, cRes] = await Promise.all([
-      fetch(`https://api.github.com/users/${u}`),
-      fetch(`https://github-contributions-api.jogruber.de/v4/${u}`)
-    ]);
-    const user = await uRes.json();
-    const { contributions } = await cRes.json();
-    if (user.message) throw new Error(user.message);
+function showError(msg){
+  const el = document.getElementById('err');
+  el.innerHTML = msg;
+  el.classList.add('show');
+}
+function clearError(){
+  document.getElementById('err').classList.remove('show');
+  document.getElementById('err').innerHTML = '';
+}
 
-    document.getElementById('av').src = user.avatar_url || '';
-    field('nm', user.name || u);
-    field('hd', `@${u}`);
-    field('bh', `@${u}`);
-    field('bi',  user.bio      || null, 'biWrap');
-    field('lct', user.location || null, 'lc');
-    field('wbt', user.blog     || null, 'wb');
-    field('emt', user.email    || null, 'em');
-    document.getElementById('hm').innerHTML = mkHeat(contributions);
-    document.getElementById('out').style.display = 'flex';
-  } catch (e) {
-    alert('Error: ' + (e.message || 'Could not load user'));
-  } finally {
-    btn.textContent = 'Generate'; btn.disabled = false;
+function showSkeleton(){
+  document.getElementById('out').classList.add('show');
+  ['nm','hd'].forEach(id => document.getElementById(id).innerHTML =
+    '<span class="skel" style="display:inline-block;width:70px;height:10px"></span>');
+  document.getElementById('bi').innerHTML =
+    '<span class="skel" style="display:inline-block;width:100%;height:16px"></span>';
+  document.getElementById('biWrap').hidden = false;
+  document.getElementById('av').src = '';
+  ['lc','wb','em'].forEach(id => document.getElementById(id).hidden = true);
+  document.getElementById('stamp').hidden = true;
+  document.getElementById('hm').innerHTML =
+    '<div class="skel" style="width:100%;height:56px"></div>';
+}
+
+async function go(){
+  const raw = document.getElementById('u').value.trim();
+  const u = raw.replace(/^@/, '');
+  clearError();
+  if (!u) return;
+  if (!/^[a-zA-Z0-9-]{1,39}$/.test(u)) {
+    showError('<b>invalid handle —</b> usernames only use letters, numbers, and hyphens.');
+    return;
   }
+
+  if (controller) controller.abort();
+  controller = new AbortController();
+  const { signal } = controller;
+
+  const btn = document.getElementById('genBtn');
+  btn.textContent = 'loading…'; btn.disabled = true;
+  currentUsername = u;
+  showSkeleton();
+
+  const key = u.toLowerCase();
+  if (cache.has(key)) {
+    render(cache.get(key));
+    btn.textContent = 'generate'; btn.disabled = false;
+    return;
+  }
+
+  const [userRes, contribRes] = await Promise.allSettled([
+    fetch(`https://api.github.com/users/${u}`, { signal }),
+    fetch(`https://github-contributions-api.jogruber.de/v4/${u}`, { signal })
+  ]);
+
+  if (signal.aborted) return;
+
+  let user = null, contributions = [];
+
+  if (userRes.status === 'fulfilled') {
+    const res = userRes.value;
+    if (res.status === 404) {
+      showError(`<b>not found —</b> no GitHub user called "${u}".`);
+      document.getElementById('out').classList.remove('show');
+      btn.textContent = 'generate'; btn.disabled = false;
+      return;
+    }
+    if (res.status === 403) {
+      showError('<b>rate limited —</b> GitHub caps unauthenticated requests at 60/hour. try again shortly.');
+      document.getElementById('out').classList.remove('show');
+      btn.textContent = 'generate'; btn.disabled = false;
+      return;
+    }
+    try { user = await res.json(); } catch { user = null; }
+  }
+  if (!user) {
+    showError('<b>couldn\'t reach GitHub —</b> check your connection and try again.');
+    document.getElementById('out').classList.remove('show');
+    btn.textContent = 'generate'; btn.disabled = false;
+    return;
+  }
+
+  if (contribRes.status === 'fulfilled') {
+    try {
+      const data = await contribRes.value.json();
+      contributions = data.contributions || [];
+    } catch { contributions = []; }
+  }
+
+  const result = { user, contributions };
+  cache.set(key, result);
+  render(result);
+  btn.textContent = 'generate'; btn.disabled = false;
+}
+
+function render({ user, contributions }){
+  const u = currentUsername;
+  document.getElementById('av').src = user.avatar_url || initialsAvatar(user.name || u);
+  document.getElementById('av').alt = `GitHub avatar for ${u}`;
+  document.getElementById('av').onerror = function(){
+    this.onerror = null;
+    this.src = initialsAvatar(user.name || u);
+  };
+
+  field('nm', user.name || u);
+  field('hd', `@${u}`);
+  field('bi', user.bio || null, 'biWrap');
+  field('lct', user.location || null, 'lc');
+  field('wbt', user.blog || null, 'wb');
+  field('emt', user.email || null, 'em');
+
+  document.getElementById('repoCount').textContent = user.public_repos ?? '–';
+  document.getElementById('followerCount').textContent = user.followers ?? '–';
+  document.getElementById('followingCount').textContent = user.following ?? '–';
+
+  if (user.created_at) {
+    const year = new Date(user.created_at).getFullYear();
+    document.getElementById('stampTxt').textContent = `MEMBER SINCE ${year}`;
+    document.getElementById('stamp').hidden = false;
+  } else {
+    document.getElementById('stamp').hidden = true;
+  }
+
+  document.getElementById('termPath').textContent = `--author=${u}`;
+  document.getElementById('hm').innerHTML = mkHeat(contributions);
+
+  const stats = computeStats(contributions.slice(-364));
+  document.getElementById('totalContrib').textContent = stats.total;
+  document.getElementById('curStreak').textContent = stats.current;
+  document.getElementById('bestStreak').textContent = stats.longest;
+
+  document.getElementById('out').classList.add('show');
+}
+
+function saveImage(){
+  if (typeof html2canvas === 'undefined') {
+    showError('<b>export unavailable —</b> the image library failed to load.');
+    return;
+  }
+  html2canvas(document.getElementById('cardsWrap'), { backgroundColor: null, scale: 3 })
+    .then(canvas => {
+      const link = document.createElement('a');
+      link.download = `${currentUsername || 'devcard'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    })
+    .catch(() => showError('<b>export failed —</b> try again, or use print instead.'));
 }
 </script>
 </body>
