@@ -142,6 +142,12 @@ body{
 .legend i{width:6px;height:6px;border-radius:1.5px;display:inline-block}
 .backStats{font-family:var(--mono);font-size:8px;color:var(--terminal-fg);display:flex;gap:10px}
 .backStats b{color:var(--amber)}
+.brand{font-family:var(--mono);font-size:6.5px;color:var(--terminal-dim);margin-top:2px}
+.brand span{color:var(--amber-dim)}
+
+.pageFooter{font-family:var(--mono);font-size:.7rem;color:var(--terminal-dim)}
+.pageFooter a{color:var(--amber);text-decoration:none}
+.pageFooter a:hover{text-decoration:underline}
 
 /* ── Skeleton ── */
 .skel{background:linear-gradient(90deg,#e4ddc9 25%,#efe9d8 37%,#e4ddc9 63%);
@@ -155,7 +161,7 @@ body{
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;padding:0;margin:0;display:block}
-  #ui,#err,.actions,.eyebrow{display:none!important}
+  #ui,#err,.actions,.eyebrow,.pageFooter{display:none!important}
   #out{display:block!important}
   #cardsWrap{display:block}
   .card{width:3.5in;height:2in;border-radius:0;box-shadow:none;break-inside:avoid}
@@ -223,6 +229,7 @@ body{
         <span>streak <b id="curStreak">–</b>d</span>
         <span>best <b id="bestStreak">–</b>d</span>
       </div>
+      <div class="brand" aria-hidden="true"># powered by <span>aroice.in</span></div>
     </div>
   </div>
 
@@ -231,6 +238,8 @@ body{
     <button class="btn btn-ghost" onclick="window.print()">print</button>
   </div>
 </div>
+
+<p class="pageFooter">powered by <a href="https://aroice.in" target="_blank" rel="noopener">AROICE</a></p>
 
 <script>
 const AMBER_SCALE = ['#161b22','#4a3418','#8a5a1e','#c98a2e','#ffb454'];
@@ -421,12 +430,19 @@ async function go(){
 
 function render({ user, contributions }){
   const u = currentUsername;
-  document.getElementById('av').src = user.avatar_url || initialsAvatar(user.name || u);
-  document.getElementById('av').alt = `GitHub avatar for ${u}`;
-  document.getElementById('av').onerror = function(){
+  const avEl = document.getElementById('av');
+  avEl.crossOrigin = 'anonymous';
+  avEl.alt = `GitHub avatar for ${u}`;
+  avEl.onerror = function(){
     this.onerror = null;
+    this.removeAttribute('crossorigin');
     this.src = initialsAvatar(user.name || u);
   };
+  // cache-bust so the request is re-issued with crossOrigin set (a prior
+  // non-CORS load of the same URL would otherwise be served from cache
+  // without the access-control headers html2canvas needs)
+  avEl.src = user.avatar_url ? `${user.avatar_url}${user.avatar_url.includes('?') ? '&' : '?'}c=${Date.now()}`
+    : initialsAvatar(user.name || u);
 
   field('nm', user.name || u);
   field('hd', `@${u}`);
@@ -463,7 +479,7 @@ function saveImage(){
     showError('<b>export unavailable —</b> the image library failed to load.');
     return;
   }
-  html2canvas(document.getElementById('cardsWrap'), { backgroundColor: null, scale: 3 })
+  html2canvas(document.getElementById('cardsWrap'), { backgroundColor: null, scale: 3, useCORS: true, allowTaint: false })
     .then(canvas => {
       const link = document.createElement('a');
       link.download = `${currentUsername || 'devcard'}.png`;
