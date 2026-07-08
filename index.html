@@ -25,27 +25,41 @@
   --sans:'Inter',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page-bg)}
 body{
   font-family:var(--sans);
-  background:radial-gradient(ellipse at 50% -10%, var(--page-bg-2), var(--page-bg) 60%);
+  background:
+    radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1.3px) 0 0/22px 22px,
+    radial-gradient(ellipse at 50% -10%, var(--page-bg-2), var(--page-bg) 60%);
   min-height:100vh;color:var(--terminal-fg);
   display:flex;flex-direction:column;align-items:center;
-  padding:3rem 1.25rem 4rem;gap:1.75rem;
+  padding:3rem 1.25rem 4rem;gap:1.6rem;
 }
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ── Prompt / input ── */
+/* Hero */
+.hero{display:flex;flex-direction:column;align-items:center;gap:.55rem;text-align:center;max-width:460px}
+.heroBadge{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;color:var(--amber);
+  border:1px solid var(--amber-dim);border-radius:999px;padding:.25rem .7rem;
+  text-transform:uppercase;background:rgba(255,180,84,.06)}
+.heroTitle{font-family:var(--mono);font-weight:700;font-size:1.7rem;letter-spacing:-.02em;
+  color:#f2ede1;line-height:1.15}
+.heroTitle span{color:var(--amber)}
+.heroSub{font-size:.86rem;color:var(--terminal-dim);line-height:1.5;max-width:38ch}
+
+/* Prompt / input */
 .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--terminal-dim);text-transform:lowercase}
-#ui{display:flex;gap:.5rem;max-width:460px;width:100%;align-items:stretch;position:relative}
-.prompt-field{flex:1;display:flex;align-items:center;gap:.5rem;background:var(--terminal-bg);
-  border:1px solid #262c36;border-radius:6px;padding:0 .85rem}
+#ui{display:flex;flex-wrap:wrap;gap:.5rem;max-width:460px;width:100%;align-items:stretch;position:relative}
+.prompt-field{flex:1;min-width:160px;display:flex;align-items:center;gap:.5rem;background:var(--terminal-bg);
+  border:1px solid #262c36;border-radius:6px;padding:0 .85rem;transition:border-color .15s ease}
+.prompt-field:focus-within{border-color:var(--amber-dim)}
 .prompt-field span{font-family:var(--mono);color:var(--amber);font-size:.95rem;user-select:none}
 #u{flex:1;padding:.7rem 0;border:none;background:transparent;color:var(--terminal-fg);
   font:500 .95rem var(--mono);outline:none;min-width:0}
 #u::placeholder{color:var(--terminal-dim)}
 .btn{padding:.7rem 1.15rem;background:var(--amber);color:#231605;border:none;
   border-radius:6px;font:700 .85rem var(--mono);cursor:pointer;white-space:nowrap;
-  letter-spacing:.02em;transition:transform .1s ease, background .15s ease}
+  letter-spacing:.02em;transition:transform .1s ease, background .15s ease, filter .15s ease}
 .btn:hover:not(:disabled){filter:brightness(1.08)}
 .btn:active:not(:disabled){transform:translateY(1px)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -54,22 +68,33 @@ body{
 .iconBtn{padding:.7rem .8rem;font-size:1rem;line-height:1}
 :focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
-/* ── Settings panel ── */
+/* Quick-try / recent chips */
+.quickTry{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;max-width:460px;width:100%}
+.quickTryLabel{font-family:var(--mono);font-size:.68rem;color:var(--terminal-dim);margin-right:.15rem}
+.chip{font-family:var(--mono);font-size:.72rem;color:var(--terminal-fg);background:var(--terminal-bg);
+  border:1px solid #262c36;border-radius:999px;padding:.3rem .65rem;cursor:pointer;
+  transition:border-color .15s ease,color .15s ease}
+.chip:hover{border-color:var(--amber);color:var(--amber)}
+
+/* Settings panel */
 .settingsPanel{
-  position:absolute;top:calc(100% + 8px);right:0;z-index:10;width:250px;
+  position:absolute;top:calc(100% + 8px);right:0;z-index:10;
+  width:min(260px, calc(100vw - 2.5rem));
   background:var(--terminal-bg);border:1px solid #262c36;border-radius:8px;
   padding:.9rem 1rem;box-shadow:0 12px 30px rgba(0,0,0,.5);
-  display:flex;flex-direction:column;gap:.65rem;
+  display:flex;flex-direction:column;gap:.6rem;
 }
 .settingsPanel[hidden]{display:none}
 .settingsTitle{font-family:var(--mono);font-size:.68rem;color:var(--terminal-dim);
-  letter-spacing:.08em;text-transform:uppercase;margin-bottom:.15rem}
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:.1rem}
 .settingsRow{display:flex;flex-direction:column;gap:.3rem}
-.settingsRow label{font-family:var(--mono);font-size:.68rem;color:var(--terminal-fg)}
+.settingsRow label{font-family:var(--mono);font-size:.68rem;color:var(--terminal-fg);
+  display:flex;align-items:center;gap:.35rem}
 .settingsRow select{
   font-family:var(--mono);font-size:.78rem;padding:.4rem .5rem;border-radius:5px;
   background:#161b22;color:var(--terminal-fg);border:1px solid #262c36;
 }
+.settingsDivider{border:none;border-top:1px dashed #262c36;margin:.1rem 0}
 .swatchRow{display:flex;gap:.4rem}
 .swatchBtn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
 .swatchBtn.active{border-color:var(--amber)}
@@ -80,12 +105,15 @@ body{
 #err.show{display:block}
 #err b{color:var(--danger)}
 
-/* ── Output ── */
-#out{display:none;flex-direction:column;align-items:center;gap:1.4rem}
+/* Output */
+#out{display:none;flex-direction:column;align-items:center;gap:1.1rem}
 #out.show{display:flex}
 #cardsWrap{display:flex;flex-direction:column;align-items:center;gap:1.4rem}
 #cardsWrap.style-duo .singleCard{display:none}
 #cardsWrap.style-single .duoCard{display:none}
+@keyframes cardsIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+#out.show #cardsWrap{animation:cardsIn .5s ease both}
+@media (prefers-reduced-motion: reduce){#out.show #cardsWrap{animation:none}}
 
 .card{width:3.5in;height:2in;border-radius:10px;overflow:hidden;position:relative;
   box-shadow:0 10px 34px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3);
@@ -96,7 +124,7 @@ body{
   background-image:radial-gradient(circle, var(--card-under, var(--paper)) 3px, transparent 3.4px);
   background-size:13px 13px;background-repeat:repeat-y;background-position:0 4px}
 
-/* ── Front (duo) ── */
+/* Front (duo) */
 .front{background:var(--paper);color:var(--ink);display:flex;align-items:center;
   padding:.2in .22in .2in .34in;gap:.16in}
 .front .perf{--card-under:var(--page-bg)}
@@ -123,7 +151,7 @@ body{
   border-top:1px dashed var(--paper-2);padding-top:4px;display:flex;gap:9px}
 .info .stats b{color:var(--ink)}
 
-/* ── Back (duo) ── */
+/* Back (duo) */
 .back{background:var(--terminal-bg);display:flex;flex-direction:column;
   justify-content:center;gap:.09in;padding:.15in .18in .15in .3in;position:relative}
 .back .perf{--card-under:var(--page-bg)}
@@ -149,7 +177,7 @@ body{
 .qrCode img{width:100%;height:100%;display:block;border-radius:2px}
 .qrCode[hidden]{display:none}
 
-/* ── Single card (condensed style) ── */
+/* Single card (condensed style) */
 .single{background:var(--paper);color:var(--ink);display:flex;flex-direction:column;
   padding:.16in .2in .13in .32in;gap:.08in}
 .single .perf{--card-under:var(--page-bg)}
@@ -164,25 +192,34 @@ body{
 .singleFoot .backStats b{color:var(--ink)}
 .singleFoot .legend{color:var(--ink-soft)}
 
+/* Fun facts strip */
+.factsBar{max-width:3.5in;width:100%;display:flex;align-items:baseline;gap:.4rem;
+  font-family:var(--mono);font-size:.72rem;color:var(--terminal-dim);
+  border-top:1px dashed #262c36;padding-top:.6rem}
+.factsBar[hidden]{display:none}
+.factsBar .factsPrompt{color:var(--amber);flex-shrink:0}
+.factsBar .factsText{color:var(--terminal-fg);overflow-wrap:anywhere}
+.factsBar .factsText b{color:var(--amber)}
+
 .pageFooter{font-family:var(--mono);font-size:.7rem;color:var(--terminal-dim)}
 .pageFooter a{color:var(--amber);text-decoration:none}
 .pageFooter a:hover{text-decoration:underline}
 
-/* ── Skeleton ── */
+/* Skeleton */
 .skel{background:linear-gradient(90deg,#e4ddc9 25%,#efe9d8 37%,#e4ddc9 63%);
   background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:4px}
 @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
 @media (prefers-reduced-motion: reduce){.skel{animation:none}}
 
-.actions{display:flex;gap:.5rem}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem}
 
-/* ── Print ── */
+/* Print */
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;padding:0;margin:0;display:block}
-  #ui,#err,.actions,.eyebrow,.pageFooter{display:none!important}
+  #ui,#err,.actions,.eyebrow,.pageFooter,.hero,.quickTry,.factsBar{display:none!important}
   #out{display:block!important}
-  #cardsWrap{display:block}
+  #cardsWrap{display:block;animation:none!important}
   .card{width:3.5in;height:2in;border-radius:0;box-shadow:none;break-inside:avoid}
   .card:hover{transform:none;box-shadow:none}
   .duoCard.front{break-after:page}
@@ -191,6 +228,12 @@ body{
 </style>
 </head>
 <body>
+
+<header class="hero">
+  <span class="heroBadge">git log --author=you</span>
+  <h1 class="heroTitle">Dev<span>Card</span></h1>
+  <p class="heroSub">Paste a GitHub handle, get a printable ID card — commit history, streaks, and all.</p>
+</header>
 
 <p class="eyebrow">// paste a github handle, get a printable id card</p>
 
@@ -209,8 +252,10 @@ body{
     <div class="settingsTitle">theme</div>
     <div class="swatchRow" id="themeSwatches" role="radiogroup" aria-label="Theme"></div>
 
+    <hr class="settingsDivider">
+
     <div class="settingsRow">
-      <label for="setMonths">contribution range</label>
+      <label for="setMonths">📅 contribution range</label>
       <select id="setMonths" onchange="onSetting('months', this.value)">
         <option value="3">last 3 months</option>
         <option value="6">last 6 months</option>
@@ -219,7 +264,7 @@ body{
     </div>
 
     <div class="settingsRow">
-      <label for="setAvatar">profile picture</label>
+      <label for="setAvatar">🙂 profile picture</label>
       <select id="setAvatar" onchange="onSetting('avatarMode', this.value)">
         <option value="github">GitHub avatar</option>
         <option value="doodle">Generated doodle</option>
@@ -227,7 +272,7 @@ body{
     </div>
 
     <div class="settingsRow">
-      <label for="setStyle">card style</label>
+      <label for="setStyle">🪪 card style</label>
       <select id="setStyle" onchange="onSetting('style', this.value)">
         <option value="duo">Duo — badge + terminal</option>
         <option value="single">Single — condensed</option>
@@ -235,13 +280,17 @@ body{
     </div>
 
     <div class="settingsRow">
-      <label for="setQr">profile QR code</label>
+      <label for="setQr">🔗 profile QR code</label>
       <select id="setQr" onchange="onSetting('showQr', this.value)">
         <option value="on">show on back</option>
         <option value="off">hide</option>
       </select>
     </div>
   </div>
+</div>
+
+<div class="quickTry" id="quickTry">
+  <span class="quickTryLabel" id="quickTryLabel">try:</span>
 </div>
 
 <div id="err" role="alert"></div>
@@ -261,6 +310,7 @@ body{
         <div><div class="bio" data-field="bio"></div></div>
         <div class="meta">
           <span id="lc" hidden><span class="dot">&#9679;</span><span id="lct"></span></span>
+          <span id="co" hidden><span class="dot">&#9679;</span><span id="cot"></span></span>
           <span id="wb" hidden><span class="dot">&#9679;</span><span id="wbt"></span></span>
           <span id="em" hidden><span class="dot">&#9679;</span><span id="emt"></span></span>
         </div>
@@ -317,9 +367,15 @@ body{
 
   </div>
 
+  <div class="factsBar" id="factsBar" hidden>
+    <span class="factsPrompt" aria-hidden="true">#</span>
+    <span class="factsText" id="factsText"></span>
+  </div>
+
   <div class="actions">
     <button class="btn btn-ghost" onclick="saveImage()">save png</button>
     <button class="btn btn-ghost" onclick="window.print()">print</button>
+    <button class="btn btn-ghost" id="copyLinkBtn" onclick="copyLink()">copy link</button>
   </div>
 </div>
 
@@ -349,25 +405,61 @@ const THEMES = {
              scale:['#161616','#3a3a3a','#5e5e5e','#8c8c8c','#e5e5e5'] }
 };
 const AVATAR_COLORS = ['#3a5a45','#7a5a2e','#4a3d5c','#5c3a3a','#2e4a5c','#5c4a2e'];
+const EXAMPLE_USERS = ['torvalds','gaearon','sindresorhus','yyx990803','tj'];
+const MAX_RECENT = 6;
 
 const settings = { theme:'amber', months:12, avatarMode:'github', style:'duo', showQr:'on' };
+let recentUsers = [];
 const cache = new Map();
 let controller = null;
 let currentUsername = '';
 let lastResult = null;
 
-/* ---------- persistence (personal, best-effort) ---------- */
 async function loadSettings(){
   try{
     const r = await window.storage.get('devcard:settings');
     if (r && r.value) Object.assign(settings, JSON.parse(r.value));
-  } catch { /* no saved settings yet */ }
+  } catch {}
 }
 function saveSettings(){
   window.storage.set('devcard:settings', JSON.stringify(settings), false).catch(() => {});
 }
+async function loadRecent(){
+  try{
+    const r = await window.storage.get('devcard:recent');
+    if (r && r.value) recentUsers = JSON.parse(r.value);
+  } catch {}
+}
+function saveRecent(){
+  window.storage.set('devcard:recent', JSON.stringify(recentUsers), false).catch(() => {});
+}
+function addRecent(u){
+  const key = u.toLowerCase();
+  recentUsers = [u, ...recentUsers.filter(r => r.toLowerCase() !== key)].slice(0, MAX_RECENT);
+  saveRecent();
+  renderChips();
+}
 
-/* ---------- avatars ---------- */
+function renderChips(){
+  const wrap = document.getElementById('quickTry');
+  const label = document.getElementById('quickTryLabel');
+  const list = recentUsers.length ? recentUsers : EXAMPLE_USERS;
+  label.textContent = recentUsers.length ? 'recent:' : 'try:';
+  wrap.querySelectorAll('.chip').forEach(c => c.remove());
+  list.forEach(name => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = name;
+    b.onclick = () => tryUser(name);
+    wrap.appendChild(b);
+  });
+}
+function tryUser(name){
+  document.getElementById('u').value = name;
+  go();
+}
+
 function seededRand(seed){
   let s = seed;
   return () => { s = (s * 1103515245 + 12345) >>> 0; return (s % 100000) / 100000; };
@@ -436,7 +528,6 @@ function applyAvatars(){
   });
 }
 
-/* ---------- profile QR code ---------- */
 function applyQrCode(){
   const wrap = document.querySelector('.qrCode');
   if (!wrap) return;
@@ -451,7 +542,6 @@ function applyQrCode(){
   wrap.hidden = false;
 }
 
-/* ---------- stats + heatmap ---------- */
 function daysInRange(contributions, months){
   if (!contributions.length) return [];
   const end = new Date(contributions[contributions.length - 1].date);
@@ -528,7 +618,27 @@ function renderLegend(scale){
   return 'less ' + scale.map(c => `<i style="background:${c}"></i>`).join('') + ' more';
 }
 
-/* ---------- field helpers ---------- */
+function renderFacts(user, topRepo){
+  const bar = document.getElementById('factsBar');
+  const text = document.getElementById('factsText');
+  const facts = [];
+
+  if (user.created_at) {
+    const ageYears = Math.floor((Date.now() - new Date(user.created_at)) / (365.25 * 86400000));
+    facts.push(ageYears >= 1 ? `<b>${ageYears}yr</b> on GitHub` : 'joined GitHub this year');
+  }
+  if (topRepo && topRepo.stargazers_count > 0) {
+    facts.push(`top repo <b>${topRepo.name}</b> (★${topRepo.stargazers_count})`);
+  }
+
+  if (facts.length) {
+    text.innerHTML = facts.join(' &nbsp;·&nbsp; ');
+    bar.hidden = false;
+  } else {
+    bar.hidden = true;
+  }
+}
+
 function setFields(name, value){
   document.querySelectorAll(`[data-field="${name}"]`).forEach(el => el.textContent = value ?? '');
 }
@@ -549,14 +659,14 @@ function showSkeleton(){
   document.querySelectorAll('[data-field="bio"]').forEach(el =>
     el.innerHTML = '<span class="skel" style="display:inline-block;width:100%;height:14px"></span>');
   document.querySelectorAll('.avatarImg').forEach(img => img.src = '');
-  ['lc','wb','em'].forEach(id => document.getElementById(id).hidden = true);
+  ['lc','co','wb','em'].forEach(id => document.getElementById(id).hidden = true);
   document.querySelectorAll('.stamp').forEach(el => el.hidden = true);
   document.querySelectorAll('.qrCode').forEach(el => el.hidden = true);
+  document.getElementById('factsBar').hidden = true;
   document.querySelectorAll('.heatSlot').forEach(el =>
     el.innerHTML = '<div class="skel" style="width:100%;height:56px"></div>');
 }
 
-/* ---------- theme + settings ---------- */
 function applyTheme(name){
   const t = THEMES[name] || THEMES.amber;
   Object.entries(t.vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
@@ -598,6 +708,15 @@ document.addEventListener('click', (e) => {
     document.getElementById('settingsBtn').setAttribute('aria-expanded', 'false');
   }
 });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const panel = document.getElementById('settingsPanel');
+    if (!panel.hidden) {
+      panel.hidden = true;
+      document.getElementById('settingsBtn').setAttribute('aria-expanded', 'false');
+    }
+  }
+});
 function onSetting(key, value){
   settings[key] = key === 'months' ? parseInt(value, 10) : value;
   if (key === 'theme') { applyTheme(value); if (settings.avatarMode === 'doodle') applyAvatars(); }
@@ -616,7 +735,25 @@ function syncSettingsUI(){
   applyTheme(settings.theme);
 }
 
-/* ---------- fetch + render ---------- */
+function copyLink(){
+  if (!currentUsername) return;
+  let url;
+  try {
+    url = `${location.origin}${location.pathname}?u=${encodeURIComponent(currentUsername)}`;
+  } catch { url = `?u=${encodeURIComponent(currentUsername)}`; }
+  const btn = document.getElementById('copyLinkBtn');
+  const original = btn.textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  }).catch(() => {
+    showError('<b>couldn\'t copy —</b> select and copy the URL from your address bar instead.');
+  });
+}
+function updateUrl(u){
+  try { history.replaceState(null, '', `?u=${encodeURIComponent(u)}`); } catch {}
+}
+
 async function go(){
   const raw = document.getElementById('u').value.trim();
   const u = raw.replace(/^@/, '');
@@ -640,21 +777,21 @@ async function go(){
   if (cache.has(key)) {
     lastResult = cache.get(key);
     render(lastResult);
+    addRecent(u);
+    updateUrl(u);
     btn.textContent = 'generate'; btn.disabled = false;
     return;
   }
 
-  // y=last requests GitHub's rolling last-12-months window (not the partial
-  // calendar year), and the timestamp param busts any stale HTTP cache —
-  // together these are what keep the graph showing genuinely current data.
-  const [userRes, contribRes] = await Promise.allSettled([
+  const [userRes, contribRes, repoRes] = await Promise.allSettled([
     fetch(`https://api.github.com/users/${u}`, { signal }),
-    fetch(`https://github-contributions-api.jogruber.de/v4/${u}?y=last&_=${Date.now()}`, { signal })
+    fetch(`https://github-contributions-api.jogruber.de/v4/${u}?y=last&_=${Date.now()}`, { signal }),
+    fetch(`https://api.github.com/users/${u}/repos?type=owner&sort=pushed&per_page=100&_=${Date.now()}`, { signal })
   ]);
 
   if (signal.aborted) return;
 
-  let user = null, contributions = [];
+  let user = null, contributions = [], topRepo = null;
 
   if (userRes.status === 'fulfilled') {
     const res = userRes.value;
@@ -686,20 +823,48 @@ async function go(){
     } catch { contributions = []; }
   }
 
-  lastResult = { user, contributions };
+  if (repoRes.status === 'fulfilled' && repoRes.value.ok) {
+    try {
+      const repos = await repoRes.value.json();
+      if (Array.isArray(repos)) {
+        topRepo = repos.filter(r => !r.fork).sort((a, b) => b.stargazers_count - a.stargazers_count)[0] || null;
+      }
+    } catch { topRepo = null; }
+  }
+
+  lastResult = { user, contributions, topRepo };
   cache.set(key, lastResult);
   render(lastResult);
+  addRecent(u);
+  updateUrl(u);
   btn.textContent = 'generate'; btn.disabled = false;
 }
 
-function render({ user }){
+function applyMeta(user){
+  const rows = [
+    { id: 'lc', textId: 'lct', val: user.location },
+    { id: 'co', textId: 'cot', val: user.company },
+    { id: 'wb', textId: 'wbt', val: user.blog },
+    { id: 'em', textId: 'emt', val: user.email }
+  ];
+  let shown = 0;
+  rows.forEach(r => {
+    if (r.val && shown < 3) {
+      document.getElementById(r.textId).textContent = r.val;
+      document.getElementById(r.id).hidden = false;
+      shown++;
+    } else {
+      document.getElementById(r.id).hidden = true;
+    }
+  });
+}
+
+function render({ user, topRepo }){
   const u = currentUsername;
   setFields('name', user.name || u);
   setFields('handle', `@${u}`);
   setFields('bio', user.bio || '');
-  field('lct', user.location || null, 'lc');
-  field('wbt', user.blog || null, 'wb');
-  field('emt', user.email || null, 'em');
+  applyMeta(user);
   setFields('repoCount', user.public_repos ?? '–');
   setFields('followerCount', user.followers ?? '–');
   setFields('followingCount', user.following ?? '–');
@@ -714,13 +879,8 @@ function render({ user }){
 
   applyAvatars();
   refreshFromSettings();
+  renderFacts(user, topRepo);
   document.getElementById('out').classList.add('show');
-}
-function field(id, val, wrapId){
-  const el = document.getElementById(id);
-  const inner = el.querySelector('span:last-child');
-  if (inner) inner.textContent = val || '';
-  if (wrapId) document.getElementById(wrapId).hidden = !val;
 }
 
 function saveImage(){
@@ -738,11 +898,18 @@ function saveImage(){
     .catch(() => showError('<b>export failed —</b> try again, or use print instead.'));
 }
 
-/* ---------- init ---------- */
 (async function init(){
   buildThemeSwatches();
-  await loadSettings();
+  await Promise.all([loadSettings(), loadRecent()]);
   syncSettingsUI();
+  renderChips();
+
+  let sharedUser = '';
+  try { sharedUser = new URLSearchParams(location.search).get('u') || ''; } catch {}
+  if (sharedUser) {
+    document.getElementById('u').value = sharedUser;
+    go();
+  }
 })();
 </script>
 </body>
